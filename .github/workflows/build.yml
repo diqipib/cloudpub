@@ -129,7 +129,7 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: cloudpub-binaries-${{ github.sha }}
-        path: artifacts/
+        path: ./
 
     - name: Create release assets
       run: |
@@ -142,7 +142,7 @@ jobs:
         tree artifacts/ || find artifacts -type d
         
         # Create compressed archives for each architecture
-        cd artifacts
+        cd artifacts  # Now we go directly to artifacts (no nested structure)
         
         # Windows x64 (check if exists first)
         if [ -f "win64/clo.exe" ]; then
