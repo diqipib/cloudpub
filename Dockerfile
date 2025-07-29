@@ -43,8 +43,8 @@ RUN     cargo install cargo-chef
 
 # Add MIPS target using nightly toolchain as it might have more targets
 RUN     rustup toolchain install nightly
-RUN     rustup target add --toolchain nightly mipsel-unknown-linux-gnu || true
-RUN     rustup target add --toolchain nightly mips-unknown-linux-gnu || true
+RUN     rustup target add --toolchain nightly mipsel-unknown-linux-musl || true
+RUN     rustup target add --toolchain nightly mips-unknown-linux-musl || true
 
 RUN     rustup target add arm-unknown-linux-musleabi
 RUN     rustup target add armv5te-unknown-linux-musleabi
