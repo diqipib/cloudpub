@@ -2,9 +2,7 @@ name: Build Multi-Architecture Binaries
 
 on:
   push:
-    branches: [ main, develop, mipsel_build_add, mips_build_add ]
   pull_request:
-    branches: [ main, develop ]
   release:
     types: [ published ]
 
