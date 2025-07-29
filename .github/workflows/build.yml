@@ -3,7 +3,7 @@ name: Build Multi-Architecture Binaries
 on:
   push:
     tags:
-      - 'v*'  # Trigger on version tags like v1.0.0, v2.1.0, etc.
+      - '**'  # Trigger on version tags like v1.0.0, v2.1.0, etc.
     branches:
       - '**'  # Trigger on pushes to any branch
   pull_request:
