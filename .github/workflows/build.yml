@@ -135,32 +135,76 @@ jobs:
       run: |
         mkdir -p release-assets
         
+        # Debug: List what's actually in the artifacts directory
+        echo "=== Contents of artifacts directory ==="
+        find artifacts -type f -exec ls -la {} \;
+        echo "=== Directory structure ==="
+        tree artifacts/ || find artifacts -type d
+        
         # Create compressed archives for each architecture
         cd artifacts
         
-        # Windows x64
-        zip -j ../release-assets/cloudpub-win64.zip win64/clo.exe
+        # Windows x64 (check if exists first)
+        if [ -f "win64/clo.exe" ]; then
+          zip -j ../release-assets/cloudpub-win64.zip win64/clo.exe
+          echo "✅ Created cloudpub-win64.zip"
+        else
+          echo "❌ win64/clo.exe not found, skipping Windows build"
+        fi
         
-        # Linux x86_64
-        tar -czf ../release-assets/cloudpub-linux-x86_64.tar.gz -C x86_64 clo
+        # Linux x86_64 (check if exists first)
+        if [ -f "x86_64/clo" ]; then
+          tar -czf ../release-assets/cloudpub-linux-x86_64.tar.gz -C x86_64 clo
+          echo "✅ Created cloudpub-linux-x86_64.tar.gz"
+        else
+          echo "❌ x86_64/clo not found, skipping x86_64 build"
+        fi
         
-        # Linux ARM64
-        tar -czf ../release-assets/cloudpub-linux-aarch64.tar.gz -C aarch64 clo
+        # Linux ARM64 (check if exists first)
+        if [ -f "aarch64/clo" ]; then
+          tar -czf ../release-assets/cloudpub-linux-aarch64.tar.gz -C aarch64 clo
+          echo "✅ Created cloudpub-linux-aarch64.tar.gz"
+        else
+          echo "❌ aarch64/clo not found, skipping ARM64 build"
+        fi
         
-        # Linux ARM
-        tar -czf ../release-assets/cloudpub-linux-arm.tar.gz -C arm clo
+        # Linux ARM (check if exists first)
+        if [ -f "arm/clo" ]; then
+          tar -czf ../release-assets/cloudpub-linux-arm.tar.gz -C arm clo
+          echo "✅ Created cloudpub-linux-arm.tar.gz"
+        else
+          echo "❌ arm/clo not found, skipping ARM build"
+        fi
         
-        # Linux ARMv5TE
-        tar -czf ../release-assets/cloudpub-linux-armv5te.tar.gz -C armv5te clo
+        # Linux ARMv5TE (check if exists first)
+        if [ -f "armv5te/clo" ]; then
+          tar -czf ../release-assets/cloudpub-linux-armv5te.tar.gz -C armv5te clo
+          echo "✅ Created cloudpub-linux-armv5te.tar.gz"
+        else
+          echo "❌ armv5te/clo not found, skipping ARMv5TE build"
+        fi
         
-        # Linux MIPS (little-endian)
-        tar -czf ../release-assets/cloudpub-linux-mipsel.tar.gz -C mipsel clo
+        # Linux MIPS (little-endian) (check if exists first)
+        if [ -f "mipsel/clo" ]; then
+          tar -czf ../release-assets/cloudpub-linux-mipsel.tar.gz -C mipsel clo
+          echo "✅ Created cloudpub-linux-mipsel.tar.gz"
+        else
+          echo "❌ mipsel/clo not found, skipping MIPS little-endian build"
+        fi
         
-        # Linux MIPS (big-endian)
-        tar -czf ../release-assets/cloudpub-linux-mips.tar.gz -C mips clo
+        # Linux MIPS (big-endian) (check if exists first)
+        if [ -f "mips/clo" ]; then
+          tar -czf ../release-assets/cloudpub-linux-mips.tar.gz -C mips clo
+          echo "✅ Created cloudpub-linux-mips.tar.gz"
+        else
+          echo "❌ mips/clo not found, skipping MIPS big-endian build"
+        fi
         
         cd ..
-        ls -la release-assets/
+        
+        # Show what release assets were created
+        echo "=== Created release assets ==="
+        ls -la release-assets/ || echo "No release assets created"
 
     - name: Generate release name
       id: release_name
@@ -173,6 +217,18 @@ jobs:
         echo "tag=v${BRANCH_NAME}-${TIMESTAMP}-${SHORT_SHA}" >> $GITHUB_OUTPUT
 
     - name: Create GitHub Release
+      run: |
+        # Check if we have any release assets to upload
+        if [ ! -d "release-assets" ] || [ -z "$(ls -A release-assets/)" ]; then
+          echo "❌ No release assets found, skipping release creation"
+          exit 1
+        fi
+        
+        echo "📦 Creating release with the following assets:"
+        ls -la release-assets/
+      
+    - name: Upload to GitHub Release
+      if: success()
       uses: softprops/action-gh-release@v1
       with:
         tag_name: ${{ steps.release_name.outputs.tag }}
@@ -190,14 +246,8 @@ jobs:
           
           Multi-architecture binaries for CloudPub including MIPS support.
           
-          ### Supported Architectures:
-          - Windows x64 (`cloudpub-win64.zip`)
-          - Linux x86_64 (`cloudpub-linux-x86_64.tar.gz`)
-          - Linux ARM64 (`cloudpub-linux-aarch64.tar.gz`)
-          - Linux ARM (`cloudpub-linux-arm.tar.gz`)
-          - Linux ARMv5TE (`cloudpub-linux-armv5te.tar.gz`)
-          - Linux MIPS Little-Endian (`cloudpub-linux-mipsel.tar.gz`)
-          - Linux MIPS Big-Endian (`cloudpub-linux-mips.tar.gz`)
+          ### Available Architectures:
+          See attached files for supported architectures.
           
           Download the appropriate archive for your system architecture.
         files: release-assets/*
