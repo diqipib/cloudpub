@@ -213,5 +213,6 @@ EOF
                                 file artifacts/mipsel/clo && \
                                 /opt/mipsel-linux-musl-cross/bin/mipsel-linux-musl-readelf -d artifacts/mipsel/clo | head -20
 
+                                
 FROM scratch AS artifacts
 COPY --from=builder /home/cloudpub/artifacts /artifacts
